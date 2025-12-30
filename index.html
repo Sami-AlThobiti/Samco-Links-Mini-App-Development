@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samco Links Mini</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Custom Tailwind Config for Animations -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slow-zoom': 'slow-zoom 20s ease-in-out infinite alternate', // New Cinematic Animation
+                    },
+                    keyframes: {
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'slow-zoom': {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.2)' }, // Subtle Zoom Effect
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            overflow-x: hidden;
+            background-color: #000;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px); /* Increased blur for better readability */
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 5px rgba(255,255,255,0.2), 0 0 10px rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .theme-royal .neon-border:hover { box-shadow: 0 0 15px #FFD700; border-color: #FFD700; }
+        .theme-neon .neon-border:hover { box-shadow: 0 0 15px #00FF00; border-color: #00FF00; }
+        .theme-cyber .neon-border:hover { box-shadow: 0 0 15px #00FFFF; border-color: #00FFFF; }
+        .theme-sunset .neon-border:hover { box-shadow: 0 0 15px #FF4500; border-color: #FF4500; }
+
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Data Configuration ---
+        const socialLinks = [
+            { 
+                id: 'x', 
+                name: 'X (Twitter)', 
+                url: 'https://x.com/designer_samco?s=21&t=dbffdoGcvgOluktAOa9LHA', 
+                icon: 'fa-brands fa-x-twitter', 
+                color: 'hover:text-gray-300' 
+            },
+            { 
+                id: 'tiktok', 
+                name: 'TikTok', 
+                url: 'https://www.tiktok.com/@samco_designer?_t=ZS-90FZRdOXUiG&_r=1', 
+                icon: 'fa-brands fa-tiktok', 
+                color: 'hover:text-pink-500' 
+            },
+            { 
+                id: 'instagram', 
+                name: 'Instagram', 
+                url: 'https://www.instagram.com/samco_design?igsh=MXhiN2RjbG1ydHducg%3D%3D&utm_source=qr', 
+                icon: 'fa-brands fa-instagram', 
+                color: 'hover:text-purple-500' 
+            },
+            { 
+                id: 'youtube', 
+                name: 'YouTube', 
+                url: 'https://www.youtube.com/@samco-desing', 
+                icon: 'fa-brands fa-youtube', 
+                color: 'hover:text-red-500' 
+            }
+        ];
+
+        // --- Themes Configuration (Stable Unsplash Images + CSS Motion) ---
+        const themes = {
+            royal: {
+                name: 'Royal Gold',
+                // Keeping Giphy if it works for you, otherwise switch to Unsplash: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853'
+                bgImage: 'url("https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif")',
+                bgColor: '#2c1e05',
+                overlay: 'bg-black/60', 
+                accent: 'text-yellow-500',
+                border: 'border-yellow-600',
+                button: 'bg-yellow-600/30 hover:bg-yellow-600/50'
+            },
+            neon: {
+                name: 'Neon Toxic',
+                bgImage: 'url("https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif")',
+                bgColor: '#052c0e',
+                overlay: 'bg-black/80',
+                accent: 'text-green-400',
+                border: 'border-green-500',
+                button: 'bg-green-500/30 hover:bg-green-500/50'
+            },
+            cyber: {
+                name: 'Heroic Blue',
+                // Professional Unsplash Image (Blue Tech/Cyberpunk)
+                bgImage: 'url("https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1974&auto=format&fit=crop")',
+                bgColor: '#05182c',
+                overlay: 'bg-blue-950/70', // Slightly clearer to see the details
+                accent: 'text-cyan-400',
+                border: 'border-cyan-500',
+                button: 'bg-cyan-500/30 hover:bg-cyan-500/50'
+            },
+            sunset: {
+                name: 'Horror Night',
+                // Professional Unsplash Image (Spooky Red Fog)
+                bgImage: 'url("https://images.unsplash.com/photo-1542259681-d4cd71f65346?q=80&w=1000&auto=format&fit=crop")',
+                bgColor: '#2c0505',
+                overlay: 'bg-red-950/50',
+                accent: 'text-red-500',
+                border: 'border-red-600',
+                button: 'bg-red-600/30 hover:bg-red-600/50'
+            }
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [page, setPage] = useState('home');
+            const [currentTheme, setCurrentTheme] = useState('royal');
+            const [showNotification, setShowNotification] = useState(false);
+            const [notificationText, setNotificationText] = useState('');
+
+            const theme = themes[currentTheme];
+
+            const triggerNotification = (text) => {
+                setNotificationText(text);
+                setShowNotification(true);
+                setTimeout(() => setShowNotification(false), 3000);
+            };
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+                triggerNotification('تم نسخ الرابط بنجاح!');
+            };
+
+            return (
+                <div className={`min-h-screen w-full relative overflow-hidden theme-${currentTheme}`}>
+                    
+                    {/* 1. Cinematic Background Layer (Moves independently) */}
+                    <div 
+                        className="fixed inset-0 z-0 animate-slow-zoom bg-cover bg-center bg-no-repeat transition-all duration-1000"
+                        style={{ 
+                            backgroundImage: theme.bgImage,
+                            backgroundColor: theme.bgColor 
+                        }}
+                    ></div>
+
+                    {/* 2. Overlay Layer (Stays fixed) */}
+                    <div className={`fixed inset-0 z-0 ${theme.overlay} transition-all duration-1000`}></div>
+
+                    {/* 3. Floating Glow Orbs */}
+                    <div className={`fixed top-0 left-0 w-64 h-64 ${theme.button} rounded-full filter blur-[100px] opacity-20 animate-float z-0`}></div>
+                    <div className={`fixed bottom-0 right-0 w-80 h-80 ${theme.button} rounded-full filter blur-[120px] opacity-20 animate-float delay-1000 z-0`}></div>
+
+                    {/* Notification Toast */}
+                    {showNotification && (
+                        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 glass-panel px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 animate-bounce border-l-4 border-green-500">
+                            <i className="fa-solid fa-check-circle text-green-400"></i>
+                            <span className="text-sm font-bold">{notificationText}</span>
+                        </div>
+                    )}
+
+                    {/* Main Content (Scrollable & Above Background) */}
+                    <main className="relative z-10 w-full max-w-md p-4 flex flex-col items-center min-h-[90vh] mx-auto justify-between">
+                        
+                        {/* Header Profile */}
+                        <div className="w-full flex flex-col items-center mb-6 mt-4">
+                            <div className={`w-28 h-28 rounded-full p-1 border-2 ${theme.border} neon-border mb-4 overflow-hidden relative group shadow-2xl`}>
+                                {/* تنبيه هام: 
+                                    تأكد أن صورة ملفك الشخصي اسمها profile.jpg 
+                                    وموجودة بجانب هذا الملف تماماً عند الرفع 
+                                */}
+                                <img 
+                                    src="./profile.jpg" 
+                                    onError={(e) => {
+                                        // إذا لم يجد الصورة، سيضع هذه الصورة الاحتياطية
+                                        e.target.src='https://cdn-icons-png.flaticon.com/512/4792/4792929.png'
+                                    }}
+                                    alt="Sami Profile" 
+                                    className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-black/10 rounded-full group-hover:bg-transparent transition-colors"></div>
+                            </div>
+                            <h1 className="text-4xl font-black tracking-wider mb-1 drop-shadow-lg text-white">SAMCO</h1>
+                            <p className={`text-sm tracking-[0.3em] uppercase font-bold opacity-90 ${theme.accent} drop-shadow-md`}>Designer & Developer</p>
+                        </div>
+
+                        {/* Content Area Switcher */}
+                        <div className="w-full flex-grow flex flex-col items-center justify-start fade-in">
+                            {page === 'home' && (
+                                <HomePage 
+                                    setPage={setPage} 
+                                    theme={theme} 
+                                    currentTheme={currentTheme}
+                                    setTheme={setCurrentTheme}
+                                    themes={themes}
+                                />
+                            )}
+                            {page === 'links' && <LinksPage theme={theme} setPage={setPage} />}
+                            {page === 'qr' && <QRPage theme={theme} setPage={setPage} />}
+                            {page === 'share' && <SharePage theme={theme} setPage={setPage} copyToClipboard={copyToClipboard} />}
+                            {page === 'contact' && <ContactPage theme={theme} setPage={setPage} />}
+                        </div>
+
+                        {/* Footer */}
+                        <footer className="w-full mt-8 text-center glass-panel rounded-t-2xl py-4 border-b-0 border-l-0 border-r-0 border-t border-white/20">
+                            <p className="text-xs text-gray-300 mb-3 font-medium">تابع سامكو للمزيد من الأدوات</p>
+                            <div className="flex justify-center gap-5 text-xl">
+                                {socialLinks.map(link => (
+                                    <a key={link.id} href={link.url} target="_blank" className={`transition-all duration-300 transform hover:scale-125 hover:-translate-y-1 ${link.color} drop-shadow-lg`}>
+                                        <i className={link.icon}></i>
+                                    </a>
+                                ))}
+                            </div>
+                            <p className="text-[10px] text-gray-500 mt-3 font-mono">Samco Links Mini © 2025</p>
+                        </footer>
+
+                    </main>
+                </div>
+            );
+        };
+
+        // --- Sub-Components (Unchanged Logic, just passing props) ---
+
+        const HomePage = ({ setPage, theme, currentTheme, setTheme, themes }) => (
+            <div className="w-full space-y-4">
+                <div className="grid grid-cols-2 gap-3 w-full mb-6">
+                    <MenuButton 
+                        icon="fa-solid fa-link" 
+                        title="روابطي" 
+                        subtitle="تابعني هنا"
+                        onClick={() => setPage('links')} 
+                        theme={theme} 
+                        delay="0"
+                    />
+                    <MenuButton 
+                        icon="fa-solid fa-qrcode" 
+                        title="QR Code" 
+                        subtitle="احفظ البطاقة"
+                        onClick={() => setPage('qr')} 
+                        theme={theme}
+                        delay="100"
+                    />
+                    <MenuButton 
+                        icon="fa-solid fa-share-nodes" 
+                        title="مشاركة" 
+                        subtitle="انشر الحساب"
+                        onClick={() => setPage('share')} 
+                        theme={theme}
+                        delay="200"
+                    />
+                    <MenuButton 
+                        icon="fa-brands fa-whatsapp" 
+                        title="تواصل" 
+                        subtitle="واتساب سريع"
+                        onClick={() => setPage('contact')} 
+                        theme={theme}
+                        delay="300"
+                    />
+                </div>
+
+                {/* Theme Selector */}
+                <div className="glass-panel p-4 rounded-2xl w-full">
+                    <p className="text-xs text-center mb-3 opacity-90 font-bold text-white">اختر الثيم المفضل</p>
+                    <div className="flex justify-center gap-4">
+                        {Object.keys(themes).map(key => (
+                            <button 
+                                key={key}
+                                onClick={() => setTheme(key)}
+                                className={`w-10 h-10 rounded-full border-2 transition-transform duration-300 transform hover:scale-110 flex items-center justify-center shadow-lg overflow-hidden relative ${currentTheme === key ? 'scale-125 border-white ring-2 ring-white/50' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                            >
+                                {/* Mini preview of color */}
+                                <div 
+                                    className="absolute inset-0 w-full h-full"
+                                    style={{ background: key === 'royal' ? '#d97706' : key === 'neon' ? '#22c55e' : key === 'cyber' ? '#06b6d4' : '#ea580c' }}
+                                ></div>
+                                {currentTheme === key && <i className="fa-solid fa-check text-white text-sm relative z-10 drop-shadow-md"></i>}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const LinksPage = ({ theme, setPage }) => (
+            <div className="w-full flex flex-col items-center">
+                <BackButton onClick={() => setPage('home')} theme={theme} />
+                <h2 className={`text-xl font-bold mb-6 ${theme.accent} tracking-wide border-b border-white/20 pb-2 w-full text-center drop-shadow-sm`}>
+                    <i className="fa-solid fa-hashtag mr-2 ml-2 text-sm"></i>
+                    روابط التواصل
+                </h2>
+                
+                <div className="w-full space-y-4">
+                    {socialLinks.map((link, idx) => (
+                        <a 
+                            key={link.id} 
+                            href={link.url} 
+                            target="_blank"
+                            className={`glass-panel w-full p-4 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-white/10 neon-border border border-transparent ${theme.border} hover:scale-[1.02]`}
+                            style={{ animationDelay: `${idx * 100}ms` }}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className={`w-10 h-10 rounded-full ${theme.button} flex items-center justify-center text-xl`}>
+                                    <i className={`${link.icon} text-white`}></i>
+                                </div>
+                                <span className="font-bold text-lg text-white">{link.name}</span>
+                            </div>
+                            <i className={`fa-solid fa-arrow-left opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all ${theme.accent}`}></i>
+                        </a>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const QRPage = ({ theme, setPage }) => (
+            <div className="w-full flex flex-col items-center">
+                <BackButton onClick={() => setPage('home')} theme={theme} />
+                
+                <div className="glass-panel p-8 rounded-3xl flex flex-col items-center mt-4 neon-border border border-white/10 relative overflow-hidden">
+                    <div className={`absolute top-0 left-0 w-full h-1 ${theme.bg}`}></div>
+                    
+                    <h3 className="text-xl font-bold mb-2 text-white">Samco Card</h3>
+                    <p className="text-xs text-gray-300 mb-6">امسح الكود للتواصل عبر واتساب</p>
+                    
+                    <div className="bg-white p-3 rounded-xl shadow-2xl relative group">
+                        <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://wa.me/966566631080')}&color=000000`} 
+                            alt="QR Code" 
+                            className="w-48 h-48 rounded-lg"
+                        />
+                        <div className="absolute inset-0 border-2 border-dashed border-gray-400 rounded-xl opacity-50"></div>
+                        <div className={`absolute top-0 left-0 w-full h-1 bg-red-500 shadow-[0_0_10px_red] animate-[scan_2s_ease-in-out_infinite] opacity-60`}></div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-6 text-xs text-gray-300">
+                        <i className="fa-solid fa-camera"></i>
+                        <span>وجه الكاميرا للمسح</span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const SharePage = ({ theme, setPage, copyToClipboard }) => (
+            <div className="w-full flex flex-col items-center">
+                <BackButton onClick={() => setPage('home')} theme={theme} />
+                
+                <div className="w-full mt-6 space-y-4 text-center">
+                    <div className={`w-20 h-20 rounded-full mx-auto ${theme.button} flex items-center justify-center text-3xl mb-4 animate-bounce`}>
+                        <i className="fa-solid fa-share-nodes text-white"></i>
+                    </div>
+                    
+                    <h2 className="text-2xl font-bold text-white">شارك الملف الشخصي</h2>
+                    <p className="text-gray-300 text-sm px-8">ساهم في نشر الإبداع بمشاركة الرابط مع أصدقائك</p>
+
+                    <div className="glass-panel p-2 rounded-xl flex items-center justify-between mt-8 pl-4">
+                        <span className="text-xs text-gray-300 truncate max-w-[150px]">samco.links/mini</span>
+                        <button 
+                            onClick={() => copyToClipboard('https://x.com/designer_samco')}
+                            className={`${theme.button} text-white px-6 py-2 rounded-lg text-sm font-bold transition-transform active:scale-95`}
+                        >
+                            نسخ الرابط
+                        </button>
+                    </div>
+
+                    <div className="flex justify-center gap-4 mt-6">
+                        <a href="https://wa.me/?text=Check%20out%20Samco%20Links!" target="_blank" className="bg-green-600 w-12 h-12 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg border border-white/10">
+                            <i className="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@samco_designer" target="_blank" className="bg-black border border-white/20 w-12 h-12 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg">
+                            <i className="fa-brands fa-tiktok"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?text=Check%20out%20Samco%20Designer!" target="_blank" className="bg-sky-500 w-12 h-12 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg border border-white/10">
+                            <i className="fa-brands fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ContactPage = ({ theme, setPage }) => (
+            <div className="w-full flex flex-col items-center">
+                <BackButton onClick={() => setPage('home')} theme={theme} />
+                
+                <h2 className="text-xl font-bold mb-8 mt-4 text-white">تواصل سريع</h2>
+                
+                <div className="w-full grid gap-4">
+                    <a href="https://wa.me/966566631080" target="_blank" className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center gap-3 hover:bg-green-900/40 transition-colors border border-green-500/30 group">
+                        <i className="fa-brands fa-whatsapp text-4xl text-green-500 group-hover:scale-110 transition-transform drop-shadow-md"></i>
+                        <span className="font-bold text-white">WhatsApp</span>
+                        <span className="text-xs text-green-400">966566631080</span>
+                    </a>
+                    
+                    <a href="mailto:Sami.AlThobiti@outlook.com" className="glass-panel p-6 rounded-2xl flex flex-col items-center justify-center gap-3 hover:bg-blue-900/40 transition-colors border border-blue-500/30 group">
+                        <i className="fa-solid fa-envelope text-4xl text-blue-400 group-hover:scale-110 transition-transform drop-shadow-md"></i>
+                        <span className="font-bold text-white">Email</span>
+                        <span className="text-xs text-blue-400">Sami.AlThobiti@outlook.com</span>
+                    </a>
+                </div>
+            </div>
+        );
+
+        const MenuButton = ({ icon, title, subtitle, onClick, theme, delay }) => (
+            <button 
+                onClick={onClick}
+                className={`glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2 text-center transition-all duration-300 hover:scale-105 active:scale-95 group neon-border border border-transparent hover:${theme.border}`}
+                style={{ animationDelay: `${delay}ms` }}
+            >
+                <div className={`w-12 h-12 rounded-full ${theme.button} flex items-center justify-center text-xl mb-1 group-hover:rotate-12 transition-transform shadow-inner`}>
+                    <i className={`${icon} text-white`}></i>
+                </div>
+                <h3 className="font-bold text-sm drop-shadow-md text-white">{title}</h3>
+                <span className="text-[10px] opacity-70 font-medium text-gray-300">{subtitle}</span>
+            </button>
+        );
+
+        const BackButton = ({ onClick, theme }) => (
+            <button 
+                onClick={onClick} 
+                className="self-start mb-4 flex items-center gap-2 text-sm opacity-80 hover:opacity-100 hover:-translate-x-1 transition-all font-bold text-white"
+            >
+                <i className={`fa-solid fa-arrow-right w-8 h-8 rounded-full ${theme.button} flex items-center justify-center`}></i>
+                <span>العودة للرئيسية</span>
+            </button>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+    
+    <style>
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</body>
+</html>
